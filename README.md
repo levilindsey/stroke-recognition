@@ -5,7 +5,8 @@
 I originally developed these algorithms as projects in a graduate course at the
 University of California, Riverside. I later extended them in my free time.
 This project contains sophisticated and novel methods for the segmentation and
-recognition of strokes. Also included is a collection of sample stroke data.
+recognition of strokes.
 
 ======
 
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=levisl176&url=github.com/levisl176/stroke-recognition&title=stroke-recognition&language=javascript&tags=github&category=software)
