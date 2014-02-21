@@ -1,0 +1,468 @@
+﻿<!--============================================================================================
+	= author: Levi Lindsey (llind001@cs.ucr.edu)
+	============================================================================================-->
+<Window x:Class="StrokeCollector.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:charting="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
+		xmlns:dataVisualization="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
+		Height="900"
+		Name="mainWindow"
+		PreviewKeyDown="OnKeyDown"
+		Title="Stroke Collector"
+		Width="1024"
+		WindowState="Maximized"
+		Closing="OnWindowClose">
+	<Window.Resources>
+		<Style x:Key="MenuBorder" 
+			   TargetType="{x:Type Border}">
+			<Setter Property="Background" Value="#111111" />
+			<Setter Property="BorderBrush" Value="#FF8888CC" />
+			<Setter Property="BorderThickness" Value="0,0,2,0" />
+			<Setter Property="DockPanel.Dock" Value="Left" />
+			<Setter Property="Padding" Value="2,2,2,2" />
+		</Style>
+		<Style x:Key="HorizontalSeparatorStyle" 
+				TargetType="{x:Type Border}">
+			<Setter Property="BorderBrush" Value="#FFBBBBFF"/>
+			<Setter Property="BorderThickness" Value="0,1,0,1"/>
+			<Setter Property="DockPanel.Dock" Value="Top" />
+			<Setter Property="Height" Value="4"/>
+			<Setter Property="HorizontalAlignment" Value="Center" />
+			<Setter Property="Margin" Value="0,8,0,8"/>
+			<Setter Property="Width" Value="128"/>
+			<Setter Property="Background" Value="#111111"/>
+		</Style>
+		<Style x:Key="MenuImageButtonUnpressed"
+			   TargetType="Button">
+			<EventSetter Event="Click" Handler="OnClick" />
+			<Setter Property="BorderBrush" Value="#FFBBBBFF"/>
+			<Setter Property="BorderThickness" Value="1,1,1,1" />
+			<Setter Property="Height" Value="38" />
+			<Setter Property="HorizontalAlignment" Value="Center" />
+			<Setter Property="Margin" Value="3,0,3,0" />
+			<Setter Property="Padding" Value="0,0,0,0" />
+			<Setter Property="VerticalAlignment" Value="Center" />
+			<Setter Property="Width" Value="38" />
+			<Setter Property="Background">
+				<Setter.Value>
+					<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+						<GradientStop Color="#FFAAAAFF" Offset="0.0" />
+						<GradientStop Color="#FFDDDDFF" Offset="0.6" />
+						<GradientStop Color="#FFE8E8FF" Offset="1.0" />
+					</LinearGradientBrush>
+				</Setter.Value>
+			</Setter>
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Opacity" Value="0.2" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		<Style x:Key="MenuImageButtonPressed"
+			   TargetType="Button"
+			   BasedOn="{StaticResource MenuImageButtonUnpressed}">
+			<Setter Property="Background">
+				<Setter.Value>
+					<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+						<GradientStop Color="#FFFF9600" Offset="0.0" />
+						<GradientStop Color="#FF884366" Offset="0.6" />
+						<GradientStop Color="#FFFFEEBB" Offset="1.0" />
+					</LinearGradientBrush>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style x:Key="MenuNormalButtonUnpressed"
+			   TargetType="Button">
+			<EventSetter Event="Click" Handler="OnClick" />
+			<Setter Property="BorderBrush" Value="#FFBBBBFF"/>
+			<Setter Property="BorderThickness" Value="1,1,1,1" />
+			<Setter Property="HorizontalAlignment" Value="Center" />
+			<Setter Property="Margin" Value="1,5,1,0" />
+			<Setter Property="Padding" Value="2,0,2,0" />
+			<Setter Property="VerticalAlignment" Value="Center" />
+			<Setter Property="Background">
+				<Setter.Value>
+					<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+						<GradientStop Color="#FFAAAAFF" Offset="0.0" />
+						<GradientStop Color="#FFDDDDFF" Offset="0.6" />
+						<GradientStop Color="#FFE8E8FF" Offset="1.0" />
+					</LinearGradientBrush>
+				</Setter.Value>
+			</Setter>
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Opacity" Value="0.2" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		<Style x:Key="MenuNormalButtonPressed"
+			   TargetType="Button"
+			   BasedOn="{StaticResource MenuNormalButtonUnpressed}">
+			<Setter Property="Background">
+				<Setter.Value>
+					<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+						<GradientStop Color="#FFFF9600" Offset="0.0" />
+						<GradientStop Color="#FF884366" Offset="0.6" />
+						<GradientStop Color="#FFFFEEBB" Offset="1.0" />
+					</LinearGradientBrush>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style x:Key="MenuComboBox" 
+			   TargetType="{x:Type ComboBox}">
+			<EventSetter Event="SelectionChanged" Handler="OnSelectionChanged" />
+			<Setter Property="BorderBrush" Value="#FFBBBBFF" />
+			<Setter Property="BorderThickness" Value="1,1,1,1" />
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="Height" Value="22" />
+			<Setter Property="HorizontalAlignment" Value="Left" />
+			<Setter Property="Margin" Value="0,0,0,0" />
+			<Setter Property="Padding" Value="4,2,2,2" />
+			<Setter Property="Width" Value="140" />
+			<Setter Property="Background">
+				<Setter.Value>
+					<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+						<GradientStop Color="#FFAAAAFF" Offset="0.0" />
+						<GradientStop Color="#FFDDDDFF" Offset="0.6" />
+						<GradientStop Color="#FFE8E8FF" Offset="1.0" />
+					</LinearGradientBrush>
+				</Setter.Value>
+			</Setter>
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Opacity" Value="0.2" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		<Style x:Key="MenuComboBoxItem" 
+			   TargetType="{x:Type ComboBoxItem}">
+			<Setter Property="FontSize" Value="12" />
+		</Style>
+		<Style x:Key="MenuListBox" 
+			   TargetType="{x:Type ListBox}">
+			<EventSetter Event="SelectionChanged" Handler="OnSelectionChanged" />
+			<Setter Property="BorderBrush" Value="#FFBBBBFF" />
+			<Setter Property="BorderThickness" Value="1,1,1,1" />
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="HorizontalAlignment" Value="Center" />
+			<Setter Property="Margin" Value="0,0,0,0" />
+			<Setter Property="SelectionMode" Value="Multiple" />
+			<Setter Property="Padding" Value="4,2,2,2" />
+			<Setter Property="Width" Value="40" />
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Opacity" Value="0.2" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		<Style x:Key="MenuListBoxItem" 
+			   TargetType="{x:Type ListBoxItem}">
+			<Setter Property="FontSize" Value="8" />
+		</Style>
+		<Style x:Key="MenuLabel" 
+			   TargetType="{x:Type Label}">
+			<Setter Property="FontSize" Value="16" />
+			<Setter Property="FontWeight" Value="DemiBold" />
+			<Setter Property="Foreground" Value="#FFFFFF" />
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+			<Setter Property="Margin" Value="0,2,0,1" />
+			<Setter Property="Padding" Value="0,0,0,0" />
+			<Setter Property="VerticalAlignment" Value="Top" />
+		</Style>
+		<Style x:Key="MenuSubLabel1" 
+			   TargetType="{x:Type Label}"
+			   BasedOn="{StaticResource MenuLabel}">
+			<Setter Property="FontSize" Value="10" />
+			<Setter Property="FontStyle" Value="Italic" />
+			<Setter Property="FontWeight" Value="Normal" />
+			<Setter Property="Foreground" Value="#FFF8F8FF" />
+			<Setter Property="Margin" Value="0,6,0,0" />
+			<Setter Property="VerticalAlignment" Value="Center" />
+		</Style>
+		<Style x:Key="MenuSubLabel2" 
+			   TargetType="{x:Type Label}"
+			   BasedOn="{StaticResource MenuLabel}">
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="FontStyle" Value="Italic" />
+			<Setter Property="FontWeight" Value="Normal" />
+			<Setter Property="Foreground" Value="#FFF8F8FF" />
+			<Setter Property="VerticalAlignment" Value="Center" />
+		</Style>
+		<Style x:Key="MenuSubLabel3" 
+			   TargetType="{x:Type Label}"
+			   BasedOn="{StaticResource MenuSubLabel2}">
+			<Setter Property="FontSize" Value="10" />
+		</Style>
+		<Style x:Key="MenuTextBox" 
+			   TargetType="{x:Type TextBox}">
+			<EventSetter Event="TextChanged"  Handler="OnTextChange" />
+			<Setter Property="BorderBrush" Value="#FFBBBBFF" />
+			<Setter Property="BorderThickness" Value="1,1,1,1" />
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="Height" Value="22" />
+			<Setter Property="HorizontalAlignment" Value="Left" />
+			<Setter Property="Margin" Value="0,3,0,0" />
+			<Setter Property="Padding" Value="0,0,0,0" />
+			<Setter Property="Width" Value="40" />
+			<Setter Property="Background">
+				<Setter.Value>
+					<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+						<GradientStop Color="#FFF8F8FF" Offset="1.0" />
+						<GradientStop Color="#FFE8E8FF" Offset="0.0" />
+					</LinearGradientBrush>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style x:Key="MenuSubTextBox1" 
+			   TargetType="{x:Type TextBox}"
+			   BasedOn="{StaticResource MenuTextBox}">
+		</Style>
+		<Style x:Key="MenuSubTextBox2" 
+			   TargetType="{x:Type TextBox}"
+			   BasedOn="{StaticResource MenuSubTextBox1}">
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="Height" Value="20" />
+			<Setter Property="Width" Value="30" />
+		</Style>
+		<Style x:Key="MenuSubTextBoxError" 
+			   TargetType="{x:Type TextBox}"
+			   BasedOn="{StaticResource MenuSubTextBox1}">
+			<Setter Property="BorderBrush" Value="#FF0000" />
+			<Setter Property="BorderThickness" Value="2,2,2,2" />
+			<Setter Property="Foreground" Value="#FF0000" />
+			<Setter Property="FontWeight" Value="Bold" />
+		</Style>
+		<Style x:Key="MenuPanel" 
+			   TargetType="{x:Type StackPanel}">
+			<Setter Property="DockPanel.Dock" Value="Top" />
+			<Setter Property="HorizontalAlignment" Value="Center" />
+			<Setter Property="Orientation" Value="Vertical" />
+			<Setter Property="VerticalAlignment" Value="Top" />
+		</Style>
+		<Style x:Key="MenuSubPanel" 
+			   TargetType="{x:Type StackPanel}"
+			   BasedOn="{StaticResource MenuPanel}">
+			<Setter Property="Orientation" Value="Horizontal" />
+			<Setter Property="VerticalAlignment" Value="Center" />
+		</Style>
+		<Style x:Key="MenuCheckBox" 
+			   TargetType="{x:Type CheckBox}">
+			<EventSetter Event="Checked" Handler="OnCheck" />
+			<EventSetter Event="Unchecked" Handler="OnUncheck" />
+			<Setter Property="BorderBrush" Value="#FFBBBBFF"/>
+			<Setter Property="BorderThickness" Value="1,1,1,1" />
+			<Setter Property="FontSize" Value="12" />
+			<Setter Property="FontStyle" Value="Italic" />
+			<Setter Property="FontWeight" Value="Normal" />
+			<Setter Property="Foreground" Value="#FFF8F8FF" />
+			<Setter Property="HorizontalAlignment" Value="Center" />
+			<Setter Property="IsThreeState" Value="False" />
+			<Setter Property="Margin" Value="0,2,0,2" />
+		</Style>
+	</Window.Resources>
+	
+	<DockPanel Name="dockPanel" LastChildFill="True">
+
+		<!--====================================================================================
+			= MENU COLUMN
+			====================================================================================-->
+
+		<Border Name="menuBorder" Style="{StaticResource MenuBorder}">
+			<ScrollViewer VerticalScrollBarVisibility="Auto">
+				<DockPanel Height="auto" HorizontalAlignment="Left" LastChildFill="True" Margin="0,0,0,0" Name="menuDockPanel" VerticalAlignment="Stretch" Width="140">
+					<StackPanel Margin="0,6,0,0" Style="{StaticResource MenuSubPanel}">
+						<Button Name="loadButton" Style="{StaticResource MenuImageButtonUnpressed}" ToolTip="Load Strokes">
+							<Image Source="./res/open_icon.png" />
+						</Button>
+						<Button Name="saveButton" Style="{StaticResource MenuImageButtonUnpressed}" ToolTip="Save Strokes">
+							<Image Source="./res/save_icon.png" />
+						</Button>
+						<Button Name="undoButton" Style="{StaticResource MenuImageButtonUnpressed}" ToolTip="Undo Last Stroke Event">
+							<Image Source="./res/undo_icon.png" />
+						</Button>
+					</StackPanel>
+
+					<Border Style="{StaticResource HorizontalSeparatorStyle}" />
+
+					<StackPanel Style="{StaticResource MenuPanel}">
+						<Label Content="Saving" Name="savingLabel" Style="{StaticResource MenuLabel}" />
+						<Label Content="To Write:" Name="toWriteLabel" Style="{StaticResource MenuSubLabel1}" />
+						<ComboBox Name="saveComboBox" SelectedIndex="1" Style="{StaticResource MenuComboBox}" Margin="0,3,0,0">
+							<ComboBoxItem Content="Default (ints)" Name="saveDefaultIntsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Default (doubles)" Name="saveDefaultDblsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Resampled (ints)" Name="saveResampledIntsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Resampled (doubles)" Name="saveResampledDblsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Feature Points (ints)" Name="saveFeaturePointsIntsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Feature Points (doubles)" Name="saveFeaturePointsDblsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Arc Length" Name="saveArcLengthComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Speed (Raw)" Name="saveSpeedRawComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Speed (Smoothed)" Name="saveSpeedSmoothedComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Curvature (Raw)" Name="saveCurvatureRawComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Curvature (Smoothed)" Name="saveCurvatureSmoothedComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Straw Value" Name="saveStrawValueComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Feature Points" Name="saveFeaturePointsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Segments" Name="saveSegmentsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+						</ComboBox>
+					</StackPanel>
+
+					<Border Style="{StaticResource HorizontalSeparatorStyle}" />
+
+					<StackPanel Style="{StaticResource MenuPanel}">
+						<Label Content="Point Processing" Name="pointProcessingLabel" Style="{StaticResource MenuLabel}" />
+						<Label Content="To Render:" Name="toRenderLabel" Style="{StaticResource MenuSubLabel1}" />
+						<ComboBox Name="pointProcessingComboBox" SelectedIndex="6" Style="{StaticResource MenuComboBox}" Margin="0,3,0,0">
+							<ComboBoxItem Content="Raw Points" Name="toRenderRawComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Smoothed Points" Name="toRenderSmoothedComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Resampled Points" Name="toRenderResampledComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Feature Pts" Name="toRenderFeaturePtsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Segments" Name="toRenderSegmentsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Points &amp; Segments" Name="toRenderPointsAndSegmentsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Ink, Points, &amp; Segments" Name="toRenderInkPointsAndSegmentsComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+						</ComboBox>
+						<Label Content="Segmentation Algorithm:" Name="segmentationAlgorithmLabel" Style="{StaticResource MenuSubLabel1}" />
+						<ComboBox Name="segAlgComboBox" SelectedIndex="4" Style="{StaticResource MenuComboBox}" Margin="0,3,0,0">
+							<ComboBoxItem Content="End Points Only" Name="segAlgEndPointsOnlyComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Short Straw" Name="segAlgShortStrawComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Speed Seg" Name="segAlgSpeedSegComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Custom Seg (w/o post-proc)" Name="segAlgCustomSegWOPostProcComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Custom Seg" Name="segAlgCustomSegComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+						</ComboBox>
+						<CheckBox Content="Show Speed/Curv?" IsChecked="False" Margin="0,8,0,1" Name="showSpeedCurvCheckBox" Style="{StaticResource MenuCheckBox}" />
+						<CheckBox Content="Resample w/ Seg Algs?" IsChecked="True" Margin="0,1,0,8" Name="resampleCheckBox" Style="{StaticResource MenuCheckBox}" />
+						<StackPanel Name="resamplePanel" Style="{StaticResource MenuSubPanel}">
+							<Label Content="Resample: " Name="resampleLabel" Style="{StaticResource MenuSubLabel2}" />
+							<TextBox Text="128" Name="resampleTextBox" Style="{StaticResource MenuSubTextBox1}" />
+						</StackPanel>
+						<StackPanel Name="speedSmoothPanel" Style="{StaticResource MenuSubPanel}">
+							<Label Content="S. Smooth: " Name="speedSmoothLabel" Style="{StaticResource MenuSubLabel2}" />
+							<TextBox Text="0" Name="speedSmoothTextBox" Style="{StaticResource MenuSubTextBox1}" />
+						</StackPanel>
+						<StackPanel Name="curvatureSmoothPanel" Style="{StaticResource MenuSubPanel}">
+							<Label Content="C. Smooth: " Name="curvatureSmoothLabel" Style="{StaticResource MenuSubLabel2}" />
+							<TextBox Text="8" Name="curvatureSmoothTextBox" Style="{StaticResource MenuSubTextBox1}" />
+						</StackPanel>
+					</StackPanel>
+
+					<Border Style="{StaticResource HorizontalSeparatorStyle}" />
+
+					<StackPanel Style="{StaticResource MenuPanel}">
+						<Label Content="Recognition" Name="recognitionLabel" Style="{StaticResource MenuLabel}" />
+
+						<StackPanel Name="strokeAngleSmoothPanel" Style="{StaticResource MenuSubPanel}">
+							<Label Content="Stroke Angle Smooth: " Name="strokeAngleSmoothLabel" Style="{StaticResource MenuSubLabel3}" />
+							<TextBox Text="1" Name="strokeAngleSmoothTextBox" Style="{StaticResource MenuSubTextBox2}" />
+						</StackPanel>
+
+						<StackPanel Name="templateAngleSmoothPanel" Style="{StaticResource MenuSubPanel}">
+							<Label Content="Template Angle Smooth: " Name="templateAngleSmoothLabel" Style="{StaticResource MenuSubLabel3}" />
+							<TextBox Text="3" Name="templateAngleSmoothTextBox" Style="{StaticResource MenuSubTextBox2}" />
+						</StackPanel>
+
+						<StackPanel Name="templateSideLengthPanel" Style="{StaticResource MenuSubPanel}">
+							<Label Content="Template Side Length: " Name="templateSideLengthLabel" Style="{StaticResource MenuSubLabel3}" />
+							<TextBox Text="14" Name="templateSideLengthTextBox" Style="{StaticResource MenuSubTextBox2}" />
+						</StackPanel>
+
+						<StackPanel Name="numOfPixelsContainingInkWeightPanel" Style="{StaticResource MenuSubPanel}">
+							<Label Content="Weight of # of Pix. w/ Ink: " Name="numOfPixelsContainingInkWeightLabel" Style="{StaticResource MenuSubLabel3}" />
+							<TextBox Text="0.09" Name="numOfPixelsContainingInkWeightTextBox" Style="{StaticResource MenuSubTextBox2}" />
+						</StackPanel>
+
+						<StackPanel Name="recognitionDistanceThresholdPanel" Style="{StaticResource MenuSubPanel}">
+							<Label Content="Rec. Distance Threshold: " Name="recognitionDistanceThresholdLabel" Style="{StaticResource MenuSubLabel3}" />
+							<TextBox Text="7" Name="recognitionDistanceThresholdTextBox" Style="{StaticResource MenuSubTextBox2}" />
+						</StackPanel>
+
+						<Label Content="Test Shapes Directory:" Name="recognitionDirLabelLabel" Style="{StaticResource MenuSubLabel1}" />
+						<Label Content="--" Name="recognitionDirLabel" Style="{StaticResource MenuSubLabel1}" FontStyle="Normal" />
+						<Button Content="Locate Test Data" Name="selectRecognitionDirButton" Style="{StaticResource MenuNormalButtonUnpressed}" ToolTip="Select a directory containing recognition shape data" />
+
+						<Label Content="Hold Out (Example #s):" Name="holdOutLabelLabel" Style="{StaticResource MenuSubLabel1}" />
+						<Label Content="--" Name="holdOutLabel" Style="{StaticResource MenuSubLabel1}" FontStyle="Normal" />
+						<ListBox Name="holdOutListBox" Style="{StaticResource MenuListBox}" Margin="0,3,0,0" />
+
+						<Button Content="Train" IsEnabled="False" Name="trainButton" Style="{StaticResource MenuNormalButtonUnpressed}" ToolTip="Train the recognizer on the data in the selected directory (minus the hold-out data)" />
+
+						<Label Content="Canvas Recognized As:" Name="canvasRecognizedAsLabelLabel" Style="{StaticResource MenuSubLabel1}" />
+						<Label Content="--" Name="canvasRecognizedAsLabel" Style="{StaticResource MenuSubLabel1}" FontStyle="Normal" />
+
+						<Label Content="View Recognition Details:" Name="viewRecognitionDetailsLabelLabel" Style="{StaticResource MenuSubLabel1}" />
+
+						<Button Content="Cross Validate" IsEnabled="False" Name="crossValidateButton" Style="{StaticResource MenuNormalButtonUnpressed}" ToolTip="Run n-fold cross validation and view the results for this recognizer" />
+
+						<Button Content="Templates" IsEnabled="False" Name="viewTemplatesButton" Style="{StaticResource MenuNormalButtonUnpressed}" ToolTip="View recognizer templates" />
+
+						<Button Content="Canvas Recognition" IsEnabled="False" Name="canvasRecognitionButton" Style="{StaticResource MenuNormalButtonUnpressed}" ToolTip="View recognition results for the canvas strokes" />
+
+						<Button Content="Hold Out Recognition" IsEnabled="False" Name="holdOutRecognitionButton" Style="{StaticResource MenuNormalButtonUnpressed}" ToolTip="View recognition results for the hold-out data" />
+					</StackPanel>
+
+					<Border Style="{StaticResource HorizontalSeparatorStyle}" />
+
+					<StackPanel Style="{StaticResource MenuPanel}">
+						<Label Content="Graphing" Name="graphingLabel" Style="{StaticResource MenuLabel}" />
+
+						<StackPanel Style="{StaticResource MenuSubPanel}">
+							<Button Margin="0,5,0,5" Name="graphButton" Style="{StaticResource MenuImageButtonUnpressed}" ToolTip="Graph Stroke Properties">
+								<Image Source="./res/chart1_icon.png" />
+							</Button>
+						</StackPanel>
+
+						<Label Content="X-Axis:" Name="xAxisLabel" Style="{StaticResource MenuSubLabel1}" />
+						<ComboBox Name="xAxisComboBox" SelectedIndex="2" Style="{StaticResource MenuComboBox}" Margin="0,3,0,0">
+							<ComboBoxItem Content="X" Name="xAxisXComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Y" Name="xAxisYComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Timestamp" Name="xAxisTimestampComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Arc Length" Name="xAxisArcLengthComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Speed" Name="xAxisSpeedComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Curvature" Name="xAxisCurvatureComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Straw Value" Name="xAxisStrawValueComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+						</ComboBox>
+
+						<Label Content="Y-Axis:" Name="yAxisLabel" Style="{StaticResource MenuSubLabel1}" />
+						<ComboBox Name="yAxisComboBox" SelectedIndex="3" Style="{StaticResource MenuComboBox}" Margin="0,3,0,0">
+							<ComboBoxItem Content="X" Name="yAxisXComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Y" Name="yAxisYComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Timestamp" Name="yAxisTimestampComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Arc Length" Name="yAxisArcLengthComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Speed" Name="yAxisSpeedComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Curvature" Name="yAxisCurvatureComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+							<ComboBoxItem Content="Straw Value" Name="yAxisStrawValueComboBoxItem" Style="{StaticResource MenuComboBoxItem}" />
+						</ComboBox>
+					</StackPanel>
+				</DockPanel>
+			</ScrollViewer>
+		</Border>
+
+		<!--================================================================================
+			= CANVAS / GRAPH AREA
+			================================================================================-->
+
+		<charting:Chart Background="#FFE8E8FF" 
+						HorizontalAlignment="Stretch" 
+						Margin="0,0,0,0" 
+						Padding="4,4,4,4" 
+						Name="chart" 
+						Title="Chart" 
+						VerticalAlignment="Stretch" 
+						Visibility="Collapsed">
+		</charting:Chart>
+
+		<Canvas Background="#FFFFFFE8" 
+				Cursor="Pen" 
+				HorizontalAlignment="Stretch" 
+				Name="canvas" 
+				PreviewMouseLeftButtonDown="OnMouseLeftButtonDown" 
+				PreviewMouseMove="OnMouseMove" 
+				PreviewMouseRightButtonDown="OnMouseRightButtonDown" 
+				MouseLeave="OnMouseLeave" 
+				MouseUp="OnMouseUp" 
+				VerticalAlignment="Stretch">
+			<Canvas.LayoutTransform>
+				<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
+			</Canvas.LayoutTransform>
+		</Canvas>
+	</DockPanel>
+</Window>

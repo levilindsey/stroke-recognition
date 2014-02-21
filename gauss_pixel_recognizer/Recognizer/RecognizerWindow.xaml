@@ -1,0 +1,343 @@
+﻿<!--============================================================================================
+	= author: Levi Lindsey (llind001@cs.ucr.edu)
+	============================================================================================-->
+<Window x:Class="StrokeCollector.RecognizerWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		Title="Recognition Results"
+		Left="170"
+		Top="10"
+		Width="800"
+		Height="1100"
+		Closing="OnWindowClose">
+	<Window.Resources>
+		<Style x:Key="MenuImageButtonUnpressed"
+			   TargetType="Button">
+			<EventSetter Event="Click" Handler="OnClick" />
+			<Setter Property="BorderBrush" Value="#FFBBBBFF"/>
+			<Setter Property="BorderThickness" Value="1,1,1,1" />
+			<Setter Property="Height" Value="38" />
+			<Setter Property="HorizontalAlignment" Value="Center" />
+			<Setter Property="Margin" Value="3,0,3,0" />
+			<Setter Property="Padding" Value="0,0,0,0" />
+			<Setter Property="VerticalAlignment" Value="Center" />
+			<Setter Property="Width" Value="38" />
+			<Setter Property="Background">
+				<Setter.Value>
+					<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+						<GradientStop Color="#FFAAAAFF" Offset="0.0" />
+						<GradientStop Color="#FFDDDDFF" Offset="0.6" />
+						<GradientStop Color="#FFE8E8FF" Offset="1.0" />
+					</LinearGradientBrush>
+				</Setter.Value>
+			</Setter>
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Opacity" Value="0.2" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		<Style x:Key="MenuImageButtonPressed"
+			   TargetType="Button"
+			   BasedOn="{StaticResource MenuImageButtonUnpressed}">
+			<Setter Property="Background">
+				<Setter.Value>
+					<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+						<GradientStop Color="#FFFF9600" Offset="0.0" />
+						<GradientStop Color="#FF884366" Offset="0.6" />
+						<GradientStop Color="#FFFFEEBB" Offset="1.0" />
+					</LinearGradientBrush>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style x:Key="BitmapCanvas"
+			   TargetType="Canvas">
+			<Setter Property="Background" Value="#FFFFFFE8" />
+			<Setter Property="Cursor" Value="Pen" />
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+			<Setter Property="VerticalAlignment" Value="Stretch" />
+		</Style>
+		<Style x:Key="CanvasTitle"
+			   TargetType="Label">
+			<Setter Property="Content" Value="&lt;Title&gt;" />
+			<Setter Property="FontSize" Value="14" />
+			<Setter Property="FontWeight" Value="Bold" />
+			<Setter Property="Foreground" Value="#FFFFFFFF" />
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+		</Style>
+		<Style x:Key="InfoLabel"
+			   TargetType="Label">
+			<Setter Property="FontSize" Value="18" />
+			<Setter Property="Foreground" Value="#FFFFFFFF" />
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+			<Setter Property="HorizontalContentAlignment" Value="Left" />
+		</Style>
+		<Style x:Key="InfoLabelLabel"
+			   TargetType="Label"
+			   BasedOn="{StaticResource InfoLabel}">
+			<Setter Property="FontWeight" Value="Bold" />
+		</Style>
+		<Style x:Key="ControlsCheckBox"
+			   TargetType="CheckBox">
+			<EventSetter Event="Checked" Handler="OnCheck" />
+			<EventSetter Event="Unchecked" Handler="OnUncheck" />
+			<Setter Property="FontSize" Value="11" />
+			<Setter Property="FontWeight" Value="Bold" />
+			<Setter Property="Foreground" Value="#FFFFFFFF" />
+			<Setter Property="HorizontalAlignment" Value="Left" />
+			<Setter Property="Width" Value="190" />
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Opacity" Value="0.2" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		<Style x:Key="ControlsRadioButton"
+			   TargetType="RadioButton">
+			<EventSetter Event="Checked" Handler="OnCheck" />
+			<Setter Property="FontSize" Value="11" />
+			<Setter Property="FontWeight" Value="Bold" />
+			<Setter Property="Foreground" Value="#FFFFFFFF" />
+			<Setter Property="HorizontalAlignment" Value="Left" />
+			<Setter Property="Width" Value="190" />
+			<Style.Triggers>
+				<Trigger Property="IsEnabled" Value="False">
+					<Setter Property="Opacity" Value="0.2" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</Window.Resources>
+	<StackPanel Background="#FF080044" Name="dockPanel">
+		<Border Name="menuBorder">
+			<DockPanel Height="40" HorizontalAlignment="Stretch" LastChildFill="True" Margin="0,0,0,0" Name="menuDockPanel" VerticalAlignment="Top" Width="auto">
+				<Button DockPanel.Dock="Left" Name="prevButton" Style="{StaticResource MenuImageButtonUnpressed}" ToolTip="Previous">
+					<Image Source="./res/prev_icon.png" />
+				</Button>
+				<Button DockPanel.Dock="Right" Name="nextButton" Style="{StaticResource MenuImageButtonUnpressed}" ToolTip="Next">
+					<Image Source="./res/next_icon.png" />
+				</Button>
+				<Label Content="&lt;Title&gt;" FontSize="20" FontWeight="Bold" Foreground="White" HorizontalContentAlignment="Center" Name="pageTitle" />
+			</DockPanel>
+		</Border>
+		<Border Name="mainAreaBorder">
+			<StackPanel Name="mainAreaStackPanel">
+				<StackPanel HorizontalAlignment="Stretch" Name="crossValidationStackPanel" Margin="3,3,3,3" Visibility="Collapsed" VerticalAlignment="Stretch">
+					<Label Content="Pixels containing ink" FontSize="26" Name="accuracyLabel" Style="{StaticResource CanvasTitle}" />
+					<Label Content="Confusion Matrix" FontSize="20" Margin="0,13,0,13" Name="confusionMatrixTitle" Style="{StaticResource CanvasTitle}" />
+					<Grid HorizontalAlignment="Stretch" Name="confusionMatrixGrid" ShowGridLines="False" VerticalAlignment="Stretch">
+						<Grid.ColumnDefinitions>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+						</Grid.RowDefinitions>
+					</Grid>
+					<Label Content="F-Measure Values" FontSize="20" Margin="0,13,0,13" Name="fMeasuresTitle" Style="{StaticResource CanvasTitle}" />
+					<Grid HorizontalAlignment="Stretch" Name="fMeasuresGrid" ShowGridLines="False" VerticalAlignment="Stretch">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition />
+							<ColumnDefinition />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+						</Grid.RowDefinitions>
+					</Grid>
+					<Label Content="Recognition Times" FontSize="20" Margin="0,13,0,13" Name="recognitionTimesTitle" Style="{StaticResource CanvasTitle}" />
+					<Grid HorizontalAlignment="Stretch" Name="recognitionTimesGrid" ShowGridLines="False" VerticalAlignment="Stretch">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition />
+							<ColumnDefinition />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+						</Grid.RowDefinitions>
+						<Label Grid.Row="0" Grid.Column="0" Content="Total Time for 15-Fold Cross-Validation: " Name="fifteenFoldCrossValidationTimeLabelLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="0" Grid.Column="1" Content="--" Name="fifteenFoldCrossValidationTimeLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="1" Grid.Column="0" Content="Time to Train a Single-User Hold Out: " Name="avgTimeForTrainingASingleUserHoldOutLabelLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="1" Grid.Column="1" Content="--" Name="avgTimeForTrainingASingleUserHoldOutLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="2" Grid.Column="0" Content="Avg. Time to Recognize a Shape: " Name="avgTimeToRecognizeAShapeLabelLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="2" Grid.Column="1" Content="--" Name="avgTimeToRecognizeAShapeLabel" Style="{StaticResource InfoLabel}" />
+					</Grid>
+				</StackPanel>
+				<StackPanel HorizontalAlignment="Stretch" Name="mainCanvasStackPanel" Margin="3,3,3,3" Visibility="Collapsed" VerticalAlignment="Stretch">
+					<Label Content="Pixels containing ink" Name="mainCanvasTitle" Style="{StaticResource CanvasTitle}" />
+					<Canvas Height="770" Name="mainCanvas" Style="{StaticResource BitmapCanvas}" Width="770">
+						<Canvas.LayoutTransform>
+							<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
+						</Canvas.LayoutTransform>
+					</Canvas>
+				</StackPanel>
+				<Grid HorizontalAlignment="Stretch" Name="splitCanvasGrid" ShowGridLines="False" Visibility="Collapsed" VerticalAlignment="Stretch">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition />
+						<ColumnDefinition />
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition />
+						<RowDefinition />
+					</Grid.RowDefinitions>
+					<StackPanel Grid.Row="0" Grid.Column="0" Name="topLeftCanvasBorder" Margin="3,3,3,3">
+						<Label Content="0&#176;" Name="topLeftCanvasTitle" Style="{StaticResource CanvasTitle}" />
+						<Canvas Height="370" Name="topLeftCanvas" Style="{StaticResource BitmapCanvas}" Width="370">
+							<Canvas.LayoutTransform>
+								<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
+							</Canvas.LayoutTransform>
+						</Canvas>
+					</StackPanel>
+					<StackPanel Grid.Row="0" Grid.Column="1" Name="topRightCanvasBorder" Margin="3,3,3,3">
+						<Label Content="45&#176;" Name="topRightCanvasTitle" Style="{StaticResource CanvasTitle}" />
+						<Canvas Height="370" Name="topRightCanvas" Style="{StaticResource BitmapCanvas}" Width="370">
+							<Canvas.LayoutTransform>
+								<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
+							</Canvas.LayoutTransform>
+						</Canvas>
+					</StackPanel>
+					<StackPanel Grid.Row="1" Grid.Column="0" Name="bottomLeftCanvasBorder" Margin="3,3,3,3">
+						<Label Content="90&#176;" Name="bottomLeftCanvasTitle" Style="{StaticResource CanvasTitle}" />
+						<Canvas Height="370" Name="bottomLeftCanvas" Style="{StaticResource BitmapCanvas}" Width="370">
+							<Canvas.LayoutTransform>
+								<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
+							</Canvas.LayoutTransform>
+						</Canvas>
+					</StackPanel>
+					<StackPanel Grid.Row="1" Grid.Column="1" Name="bottomRightCanvasBorder" Margin="3,3,3,3">
+						<Label Content="135&#176;" Name="bottomRightCanvasTitle" Style="{StaticResource CanvasTitle}" />
+						<Canvas Height="370" Name="bottomRightCanvas" Style="{StaticResource BitmapCanvas}" Width="370">
+							<Canvas.LayoutTransform>
+								<ScaleTransform ScaleX="1" ScaleY="-1" CenterX=".5" CenterY=".5" />
+							</Canvas.LayoutTransform>
+						</Canvas>
+					</StackPanel>
+				</Grid>
+				<DockPanel HorizontalAlignment="Stretch" Name="infoTemplateDockPanel" Visibility="Collapsed" VerticalAlignment="Stretch">
+					<Grid Height="805" HorizontalAlignment="Stretch" Name="infoTemplateGrid" ShowGridLines="False" Visibility="Visible" VerticalAlignment="Stretch">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition />
+							<ColumnDefinition />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+						</Grid.RowDefinitions>
+
+						<Label Grid.Row="1" Grid.Column="0" Content="Shape ID:" Name="infoShapeIDLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="1" Grid.Column="1" Content="--" Name="infoShapeIDLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="2" Grid.Column="0" Content="Avg Pixels containing ink:" Name="infoAvgPixelsContainingInkLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="2" Grid.Column="1" Content="--" Name="infoAvgPixelsContainingInkLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="3" Grid.Column="0" Content="Time To Train:" Name="infoTimeToTrainLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="3" Grid.Column="1" Content="--" Name="infoTimeToTrainLabel" Style="{StaticResource InfoLabel}" />
+					</Grid>
+				</DockPanel>
+				<DockPanel HorizontalAlignment="Stretch" Name="infoShapeInstanceDockPanel" Visibility="Collapsed" VerticalAlignment="Stretch">
+					<Grid Height="805" HorizontalAlignment="Stretch" Name="infoShapeInstanceGrid" ShowGridLines="False" Visibility="Visible" VerticalAlignment="Stretch">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition />
+							<ColumnDefinition />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+							<RowDefinition />
+						</Grid.RowDefinitions>
+
+						<Label Grid.Row="1" Grid.Column="0" Content="This Shape Instance" Name="infoShapeInstanceLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="2" Grid.Column="0" Content="Subject:" Name="infoSubjectLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="2" Grid.Column="1" Content="--" Name="infoSubjectLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="3" Grid.Column="0" Content="Example:" Name="infoExampleLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="3" Grid.Column="1" Content="--" Name="infoExampleLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="4" Grid.Column="0" Content="Time To Recognize:" Name="infoTimeToRecognizeLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="4" Grid.Column="1" Content="--" Name="infoTimeToRecognizeLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="5" Grid.Column="0" Content="Pixels containing ink:" Name="infoPixelsContainingInkLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="5" Grid.Column="1" Content="--" Name="infoPixelsContainingInkLabel" Style="{StaticResource InfoLabel}" />
+
+						<Label Grid.Row="7" Grid.Column="0" Content="The Recognized Shape Template" Name="infoRecognizedTemplateLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="8" Grid.Column="0" Content="Shape ID:" Name="infoRecognizedIDLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="8" Grid.Column="1" Content="--" Name="infoRecognizedIDLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="9" Grid.Column="0" Content="Distance:" Name="infoRecognizedDistanceLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="9" Grid.Column="1" Content="--" Name="infoRecognizedDistanceLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="10" Grid.Column="0" Content="Pixels containing ink:" Name="infoRecognizedPixelsContainingInkLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="10" Grid.Column="1" Content="--" Name="infoRecognizedPixelsContainingInkLabel" Style="{StaticResource InfoLabel}" />
+
+						<Label Grid.Row="12" Grid.Column="0" Content="The Actual Shape Template" Name="infoActualTemplateLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="13" Grid.Column="0" Content="Shape ID:" Name="infoActualLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="13" Grid.Column="1" Content="--" Name="infoActualLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="14" Grid.Column="0" Content="Distance:" Name="infoActualDistanceLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="14" Grid.Column="1" Content="--" Name="infoActualDistanceLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="15" Grid.Column="0" Content="Pixels containing ink:" Name="infoActualPixelsContainingInkLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="15" Grid.Column="1" Content="--" Name="infoActualPixelsContainingInkLabel" Style="{StaticResource InfoLabel}" />
+
+						<Label Grid.Row="17" Grid.Column="0" Content="First Color:" Name="infoFirstColorLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="17" Grid.Column="1" Content="Blue" Name="infoFirstColorLabel" Style="{StaticResource InfoLabel}" />
+						<Label Grid.Row="18" Grid.Column="0" Content="Last Color:" Name="infoLastColorLabelLabel" Style="{StaticResource InfoLabelLabel}" />
+						<Label Grid.Row="18" Grid.Column="1" Content="Purple" Name="infoLastColorLabel" Style="{StaticResource InfoLabel}" />
+					</Grid>
+				</DockPanel>
+			</StackPanel>
+		</Border>
+		<StackPanel Name="controlsStackPanel" Margin="0,3,0,0" Orientation="Vertical">
+			<StackPanel Name="controlsSubStackPanel1" Margin="5,0,5,0" Orientation="Horizontal" HorizontalAlignment="Left">
+				<CheckBox Content="Show Statistics" IsChecked="False" Name="statisticsCheckBox" Style="{StaticResource ControlsCheckBox}" />
+				<CheckBox Content="Show Original Strokes" IsChecked="False" Name="originalStrokesCheckBox" Style="{StaticResource ControlsCheckBox}" />
+				<CheckBox Content="Show Directional Components" IsChecked="True" Name="directionalComponentsCheckBox" Style="{StaticResource ControlsCheckBox}" />
+				<CheckBox Content="Show Distance Numbers" IsChecked="True" Name="showDistanceNumbersCheckBox" Style="{StaticResource ControlsCheckBox}" />
+			</StackPanel>
+			<StackPanel Name="controlsSubStackPanel2" Margin="5,0,5,0" Orientation="Horizontal" HorizontalAlignment="Left">
+				<CheckBox Content="Show Grid Lines" IsChecked="False" Name="gridLinesCheckBox" Style="{StaticResource ControlsCheckBox}" />
+				<CheckBox Content="Show Stroke Points" IsChecked="True" Name="strokePointsCheckBox" Style="{StaticResource ControlsCheckBox}" />
+				<CheckBox Content="Show Stroke Lines" IsChecked="True" Name="strokeLinesCheckBox" Style="{StaticResource ControlsCheckBox}" />
+				<CheckBox Content="Color-Code Points" IsChecked="True" Name="colorCodeCellsCheckBox" Style="{StaticResource ControlsCheckBox}" />
+			</StackPanel>
+			<StackPanel Name="controlsSubStackPanel3" Margin="5,0,5,0" Orientation="Horizontal" HorizontalAlignment="Left">
+				<RadioButton GroupName="PixelValues" Content="Shape Instance Values Alone" IsChecked="False" Name="shapeInstanceValuesAloneRadioButton" Style="{StaticResource ControlsRadioButton}" />
+				<RadioButton GroupName="PixelValues" Content="Template Overlay (Actual)" IsChecked="False" Name="templateOverlayActualRadioButton" Style="{StaticResource ControlsRadioButton}" />
+				<RadioButton GroupName="PixelValues" Content="Template Overlay (Recognized)" IsChecked="True" Name="templateOverlayRecognizedRadioButton" Style="{StaticResource ControlsRadioButton}" />
+			</StackPanel>
+			<StackPanel Name="controlsSubStackPanel4" Margin="5,0,5,0" Orientation="Horizontal" HorizontalAlignment="Left">
+				<RadioButton GroupName="PixelValues" Content="No Pixel Values" IsChecked="False" Name="noPixelValuesRadioButton" Style="{StaticResource ControlsRadioButton}" />
+				<RadioButton GroupName="PixelValues" Content="Template Distances (Actual)" IsChecked="False" Name="templateDistancesActualRadioButton" Style="{StaticResource ControlsRadioButton}" />
+				<RadioButton GroupName="PixelValues" Content="Template Distances (Recognized)" IsChecked="False" Name="templateDistancesRecognizedRadioButton" Style="{StaticResource ControlsRadioButton}" />
+			</StackPanel>
+		</StackPanel>
+	</StackPanel>
+</Window>
