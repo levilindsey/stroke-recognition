@@ -4,8 +4,7 @@
 
 I originally developed these algorithms as projects in a graduate course at the
 University of California, Riverside. I later extended them in my free time.
-This project contains sophisticated and novel methods for the segmentation and
-recognition of strokes.
+This project contains novel methods for the segmentation and recognition of strokes.
 
 ======
 
